@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-REPO="${RUNX_REPO:-your-org/runx}"
+REPO="${RUNX_REPO:-aryankahar31/runx}"
 VERSION="${RUNX_VERSION:-latest}"
 INSTALL_DIR="${RUNX_INSTALL_DIR:-$HOME/.runx/bin}"
 

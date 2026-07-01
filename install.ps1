@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$Repo = if ($env:RUNX_REPO) { $env:RUNX_REPO } else { "your-org/runx" }
+$Repo = if ($env:RUNX_REPO) { $env:RUNX_REPO } else { "aryankahar31/runx" }
 $Version = if ($env:RUNX_VERSION) { $env:RUNX_VERSION } else { "latest" }
 $InstallDir = if ($env:RUNX_INSTALL_DIR) { $env:RUNX_INSTALL_DIR } else { Join-Path $HOME ".runx\bin" }
 

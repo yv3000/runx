@@ -102,11 +102,33 @@ jobs:
           Copy-Item "target\${{ matrix.target }}\release\${{ matrix.binary }}" "package\runx.exe"
           Compress-Archive -Path "package\runx.exe" -DestinationPath "dist\${{ matrix.artifact }}" -Force
 
+      - name: Generate SHA-256 checksum (Linux/macOS)
+        if: matrix.archive == 'tar'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd dist
+          shasum -a 256 "${{ matrix.artifact }}" > "${{ matrix.artifact }}.sha256"
+
+      - name: Generate SHA-256 checksum (Windows)
+        if: matrix.archive == 'zip'
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash "dist\${{ matrix.artifact }}" -Algorithm SHA256).Hash.ToLower()
+          "$hash  ${{ matrix.artifact }}" | Out-File -Encoding ascii "dist\${{ matrix.artifact }}.sha256"
+
       - name: Upload packaged asset
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
           path: dist/${{ matrix.artifact }}
+          if-no-files-found: error
+
+      - name: Upload checksum file
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}.sha256
+          path: dist/${{ matrix.artifact }}.sha256
           if-no-files-found: error
 
   publish:
@@ -119,6 +141,16 @@ jobs:
         with:
           path: dist
           merge-multiple: true
+
+      - name: Generate combined SHA256SUMS
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd dist
+          # Combine all individual .sha256 files into one SHA256SUMS file
+          cat *.sha256 | sort > SHA256SUMS
+          echo "--- SHA256SUMS ---"
+          cat SHA256SUMS
 
       - name: Publish release
         uses: softprops/action-gh-release@v2

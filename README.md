@@ -55,6 +55,7 @@ No version managers.
 - 📦 Automatic runtime downloads
 - 💾 Intelligent runtime cache
 - 🔒 Isolated execution environment
+- 🛡 SHA-256 checksum verification on install
 - ⚡ Fast startup after first download
 - 🖥 Cross-platform (Linux, macOS, Windows)
 - ⚙ Configuration using `runx.toml`
@@ -82,6 +83,11 @@ iwr https://raw.githubusercontent.com/aryankahar31/runx/main/install.ps1 | iex
 
 ---
 
+> **🛡 Security:** Both install scripts automatically verify the downloaded
+> binary against the SHA-256 checksum published with each release. If the
+> checksum doesn't match, the installer will abort without extracting or
+> installing anything.
+
 Verify installation
 
 ```bash
@@ -91,7 +97,41 @@ runx --version
 Expected output
 
 ```
-runx 0.1.0
+runx 0.1.1
+```
+
+---
+
+# Verifying a Release Manually
+
+If you download a binary directly from
+[GitHub Releases](https://github.com/aryankahar31/runx/releases) instead of
+using the install script, you can verify it manually.
+
+## Linux / macOS
+
+```bash
+# Download the archive and the SHA256SUMS file
+curl -fsSLO https://github.com/aryankahar31/runx/releases/latest/download/runx-linux-x64.tar.gz
+curl -fsSLO https://github.com/aryankahar31/runx/releases/latest/download/SHA256SUMS
+
+# Verify (prints OK if the checksum matches)
+sha256sum -c SHA256SUMS --ignore-missing
+# or on macOS:
+shasum -a 256 -c SHA256SUMS --ignore-missing
+```
+
+## Windows PowerShell
+
+```powershell
+# Download the archive and the per-file checksum
+Invoke-WebRequest -Uri https://github.com/aryankahar31/runx/releases/latest/download/runx-windows-x64.zip -OutFile runx-windows-x64.zip
+Invoke-WebRequest -Uri https://github.com/aryankahar31/runx/releases/latest/download/runx-windows-x64.zip.sha256 -OutFile runx-windows-x64.zip.sha256
+
+# Compare
+$expected = (Get-Content .\runx-windows-x64.zip.sha256).Split(' ')[0]
+$computed = (Get-FileHash .\runx-windows-x64.zip -Algorithm SHA256).Hash
+if ($expected -ieq $computed) { Write-Host "OK" } else { Write-Error "MISMATCH" }
 ```
 
 ---
@@ -375,6 +415,7 @@ Instead, every command runs inside an isolated environment using only the config
 - ✅ GitHub Releases
 - ✅ Cross-platform installers
 - ✅ GitHub Actions CI/CD
+- ✅ SHA-256 checksum verification (v0.1.1)
 
 ---
 
